@@ -1,5 +1,5 @@
 <div align="center">
-    <img align="center" src="./images/Aista.jpg" alt="Error 404" height="80">
+    <img align="center" src="./images/Aista.JPG" alt="Error 404" height="80">
 </div>
 
 # Quiz Port: Backend
