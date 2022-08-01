@@ -1,0 +1,1 @@
+alter table studentdetails add column username varchar(250) not null

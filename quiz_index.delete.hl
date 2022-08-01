@@ -1,0 +1,33 @@
+
+/*
+ * Template for HTTP DELETE CRUD requests.
+ * This file was automatically generated using Magic's CRUDifier.
+ */
+.arguments
+   quiz_id:string
+.description:Deletes one item from your quiz_index table in your [generic|quiz_portal] database matching the specified argument(s)
+.type:crud-delete
+
+// Verifying user is authorized to access endpoint.
+auth.ticket.verify:root, admin
+validators.mandatory:x:@.arguments/*/quiz_id
+
+// Opening up our database connection.
+data.connect:[generic|quiz_portal]
+   database-type:mysql
+
+   // Parametrising our delete invocation.
+   add:x:./*/data.delete/*/where/*/and
+      get-nodes:x:@.arguments/*
+
+   // Deleting item from database.
+   data.delete
+      database-type:mysql
+      table:quiz_index
+      where
+         and
+
+   // Returning result of above invocation to caller.
+   unwrap:x:+/*
+   return
+      affected:x:@data.delete

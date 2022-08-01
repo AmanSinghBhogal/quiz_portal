@@ -1,0 +1,88 @@
+
+/*
+ * Template for HTTP GET CRUD requests.
+ * This file was automatically generated using Magic's CRUDifier.
+ */
+.arguments
+   limit:long
+   offset:long
+   order:string
+   direction:string
+   operator:string
+   questions.question_id.like:string
+   questions.question_id.eq:string
+   questions.quiz_id.like:string
+   questions.quiz_id.eq:string
+   questions.question.like:string
+   questions.question.eq:string
+   questions.option_1.like:string
+   questions.option_1.eq:string
+   questions.option_2.like:string
+   questions.option_2.eq:string
+   questions.option_3.like:string
+   questions.option_3.eq:string
+   questions.option_4.like:string
+   questions.option_4.eq:string
+   questions.correct_answer.like:string
+   questions.correct_answer.eq:string
+   questions.award_points.eq:long
+.description:Returns items from your questions table in your [generic|quiz_portal] database according to the specified arguments
+.type:crud-read
+
+// Verifying user is authorized to access endpoint.
+auth.ticket.verify:root, admin
+
+// Sanity checking invocation.
+validators.enum:x:@.arguments/*/operator
+   .:or
+   .:and
+
+/*
+ * Checking if user supplied an [operator] argument, and if so
+ * changing the boolean operator for comparison operations.
+ */
+if
+   exists:x:@.arguments/*/operator
+   .lambda
+
+      // User provided a boolean comparison [operator] argument.
+      set-name:x:../*/data.connect/*/data.read/*/where/*
+         get-value:x:@.arguments/*/operator
+
+// Opening up our database connection.
+data.connect:[generic|quiz_portal]
+   database-type:mysql
+
+   // Parametrising our read invocation.
+   add:x:./*/data.read
+      get-nodes:x:@.arguments/*/limit
+      get-nodes:x:@.arguments/*/offset
+      get-nodes:x:@.arguments/*/order
+      get-nodes:x:@.arguments/*/direction
+   remove-nodes:x:@.arguments/*/operator
+   remove-nodes:x:@.arguments/*/limit
+   remove-nodes:x:@.arguments/*/offset
+   remove-nodes:x:@.arguments/*/order
+   remove-nodes:x:@.arguments/*/direction
+   add:x:./*/data.read/*/where/*
+      get-nodes:x:@.arguments/*
+
+   // Reading data from database.
+   data.read
+      database-type:mysql
+      table:questions
+      columns
+         questions.question_id
+         questions.quiz_id
+         questions.question
+         questions.option_1
+         questions.option_2
+         questions.option_3
+         questions.option_4
+         questions.correct_answer
+         questions.award_points
+      where
+         and
+
+   // Returning result of above read invocation to caller.
+   return-nodes:x:@data.read/*

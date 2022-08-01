@@ -1,0 +1,41 @@
+
+/*
+ * Template for HTTP GET CRUD requests.
+ * This file was automatically generated using Magic's CRUDifier.
+ */
+.description:Returns items from your organisations table in your [generic|quiz_portal] database according to the specified arguments
+.type:crud-read
+
+response.headers.set
+   Cache-Control:public, max-age=3600
+
+
+// Opening up our database connection.
+data.connect:[generic|quiz_portal]
+   database-type:mysql
+
+   // Reading data from database.
+   data.read
+      database-type:mysql
+      table:organisations
+         join:studentdetails
+            as:_id
+            type:left
+            on
+               and
+                  organisations._id:_id._id
+      columns
+         organisations.org_name
+         organisations.org_id
+         organisations.description
+         organisations.category
+         organisations.faculty_ad_name
+         organisations._id
+         _id.stude_name
+            as:_id.stude_name
+         _id.username
+            as:org_admin
+      limit:-1
+
+   // Returning result of above read invocation to caller.
+   return-nodes:x:@data.read/*

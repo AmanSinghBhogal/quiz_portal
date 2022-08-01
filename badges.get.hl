@@ -1,0 +1,52 @@
+
+/*
+ * Template for HTTP GET CRUD requests.
+ * This file was automatically generated using Magic's CRUDifier.
+ */
+.arguments
+   limit:long
+   offset:long
+.description:Returns items from your badges table in your [generic|quiz_portal] database according to the specified arguments
+.type:crud-read
+
+// Verifying user is authorized to access endpoint.
+auth.ticket.verify:root, admin, guest
+
+auth.ticket.get
+
+
+
+// Opening up our database connection.
+data.connect:[generic|quiz_portal]
+   database-type:mysql
+
+   // Parametrising our read invocation.
+   add:x:./*/data.read
+      get-nodes:x:@.arguments/*/limit
+      get-nodes:x:@.arguments/*/offset
+   remove-nodes:x:@.arguments/*/limit
+   remove-nodes:x:@.arguments/*/offset
+   add:x:./*/data.read/*/where/*
+      get-nodes:x:@.arguments/*
+
+   // Reading data from database.
+   data.read
+      database-type:mysql
+      table:badges
+         join:studentdetails
+            as:_id
+            type:left
+            on
+               and
+                  badges._id:_id._id
+      columns
+         badges._id
+         badges.tag
+         _id.stude_name
+            as:_id.stude_name
+      where
+         and
+            _id.username.eq:x:@auth.ticket.get
+
+   // Returning result of above read invocation to caller.
+   return-nodes:x:@data.read/*

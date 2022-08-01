@@ -1,0 +1,86 @@
+
+/*
+ * Template for HTTP GET CRUD requests.
+ * This file was automatically generated using Magic's CRUDifier.
+ */
+.arguments
+   limit:long
+   offset:long
+   order:string
+   direction:string
+   operator:string
+   org_admins._id.eq:long
+   org_admins.org_id.eq:long
+   _id.stude_name.eq:string
+   _id.stude_name.like:string
+   org_id.org_name.eq:string
+   org_id.org_name.like:string
+.description:Returns items from your org_admins table in your [generic|quiz_portal] database according to the specified arguments
+.type:crud-read
+
+// Verifying user is authorized to access endpoint.
+auth.ticket.verify:root, admin
+
+// Sanity checking invocation.
+validators.enum:x:@.arguments/*/operator
+   .:or
+   .:and
+
+/*
+ * Checking if user supplied an [operator] argument, and if so
+ * changing the boolean operator for comparison operations.
+ */
+if
+   exists:x:@.arguments/*/operator
+   .lambda
+
+      // User provided a boolean comparison [operator] argument.
+      set-name:x:../*/data.connect/*/data.read/*/where/*
+         get-value:x:@.arguments/*/operator
+
+// Opening up our database connection.
+data.connect:[generic|quiz_portal]
+   database-type:mysql
+
+   // Parametrising our read invocation.
+   add:x:./*/data.read
+      get-nodes:x:@.arguments/*/limit
+      get-nodes:x:@.arguments/*/offset
+      get-nodes:x:@.arguments/*/order
+      get-nodes:x:@.arguments/*/direction
+   remove-nodes:x:@.arguments/*/operator
+   remove-nodes:x:@.arguments/*/limit
+   remove-nodes:x:@.arguments/*/offset
+   remove-nodes:x:@.arguments/*/order
+   remove-nodes:x:@.arguments/*/direction
+   add:x:./*/data.read/*/where/*
+      get-nodes:x:@.arguments/*
+
+   // Reading data from database.
+   data.read
+      database-type:mysql
+      table:org_admins
+         join:studentdetails
+            as:_id
+            type:left
+            on
+               and
+                  org_admins._id:_id._id
+         join:organisations
+            as:org_id
+            type:left
+            on
+               and
+                  org_admins.org_id:org_id.org_id
+      columns
+         org_admins._id
+         org_admins.org_id
+         _id.stude_name
+            as:_id.stude_name
+         org_id.org_name
+            as:org_id.org_name
+      where
+         and
+
+   // Returning result of above read invocation to caller.
+   return-nodes:x:@data.read/*

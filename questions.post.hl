@@ -1,0 +1,48 @@
+
+/*
+ * Template for HTTP POST CRUD requests.
+ * This file was automatically generated using Magic's CRUDifier.
+ */
+.arguments
+   question_id:string
+   quiz_id:string
+   question:string
+   option_1:string
+   option_2:string
+   option_3:string
+   option_4:string
+   correct_answer:string
+   award_points:long
+.description:Creates an item in your questions table in your [generic|quiz_portal] database according to the specified arguments
+.type:crud-create
+
+// Verifying user is authorized to access endpoint.
+auth.ticket.verify:root, admin
+.foreign-keys
+   .
+      column:quiz_id
+      table:quiz_index
+      foreign_column:quiz_id
+      foreign_name:quiz_id
+      long:bool:true
+
+// Opening up database connection.
+data.connect:[generic|quiz_portal]
+   database-type:mysql
+
+   // Parametrising our create invocation.
+   add:x:./*/data.create/*/values
+      get-nodes:x:@.arguments/*
+
+   // Creating our record.
+   data.create
+      database-type:mysql
+      table:questions
+      return-id:bool:false
+      values
+
+   // Returning result of above invoction to caller.
+   response.status.set:201
+   unwrap:x:+/*
+   return
+      result:success

@@ -1,0 +1,52 @@
+
+/*
+ * Template for HTTP PUT CRUD requests.
+ * This file was automatically generated using Magic's CRUDifier.
+ */
+.arguments
+   _id:long
+   stude_name:string
+   batch:string
+   admission_year:date
+   email_id:string
+   phone_no:string
+   linkedin:string
+   points:long
+.description:Updates an existing item in your studentdetails table in your [generic|quiz_portal] database according to the specified arguments
+.type:crud-update
+
+// Verifying user is authorized to access endpoint.
+validators.mandatory:x:@.arguments/*/_id
+auth.ticket.verify:root, admin
+
+// Opening up our database connection.
+data.connect:[generic|quiz_portal]
+   database-type:mysql
+   add:x:./*/data.update/*/where/*/and
+      get-nodes:x:@.arguments/*/[0,1]
+   add:x:./*/data.update/*/values
+      get-nodes:x:@.arguments/*/[1,1000]
+
+   // Invoking our update slot.
+   data.update
+      database-type:mysql
+      table:studentdetails
+      values
+      where
+         and
+
+   // Verifying record exists.
+   if
+      eq
+         get-value:x:@data.update
+         .:int:0
+      .lambda
+         response.status.set:404
+         return
+            result:Record not found
+
+   // Returning success to caller.
+   response.status.set:202
+   unwrap:x:+/*
+   return
+      affected:x:@data.update
